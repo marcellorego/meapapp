@@ -1,0 +1,21 @@
+{
+  "name": "MeanApp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "database": "localhost/meanapp",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "lodash": "^3.10.1",
+    "method-override": "^2.3.5",
+    "mongoose": "^4.3.1",
+    "morgan": "^1.6.1",
+    "node-restful": "^0.2.4"
+  }
+}
