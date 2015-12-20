@@ -1,1 +1,1 @@
-mongod.exe --dbpath C:\web\html\meanapp\db
+mongod.exe --dbpath ./db
