@@ -21,11 +21,9 @@ module.exports = connectDB;
     });
 };*/
 
-function connectDB(onOpen, onError) {
+function connectDB(database, onOpen, onError) {
     
-    var pjson = require('../package.json');
-    console.log(pjson.version);
-    console.log(pjson.database);
+    console.log(database);
     
     var options = {
         db: { native_parser: true },
@@ -33,7 +31,7 @@ function connectDB(onOpen, onError) {
     };
 
     var mongoose = require('mongoose');
-    mongoose.connect('mongodb://' + pjson.database, options);
+    mongoose.connect('mongodb://' + database, options);
 
     var db = mongoose.connection;
 

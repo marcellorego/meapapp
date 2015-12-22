@@ -55,7 +55,7 @@ angular
     });
   })
   .factory('Movie', function(MovieRestangular) {
-    return MovieRestangular.service('movie');
+    return MovieRestangular.service('movieController');
   })
   .directive('youtube', function() {
     return {
