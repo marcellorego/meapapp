@@ -27,19 +27,19 @@ angular
         templateUrl: 'views/movies.html',
         controller: 'MoviesCtrl'
       })
-      .when('/create/movie', {
+      .when('/movies/create', {
         templateUrl: 'views/movie-add.html',
         controller: 'MovieAddCtrl'
       })
-      .when('/movie/:id', {
+      .when('/movies/:id', {
         templateUrl: 'views/movie-view.html',
         controller: 'MovieViewCtrl'
       })
-      .when('/movie/:id/edit', {
+      .when('/movies/:id/edit', {
         templateUrl: 'views/movie-edit.html',
         controller: 'MovieEditCtrl'
       })
-      .when('/movie/:id/delete', {
+      .when('/movies/:id/delete', {
         templateUrl: 'views/movie-delete.html',
         controller: 'MovieDeleteCtrl'
       })

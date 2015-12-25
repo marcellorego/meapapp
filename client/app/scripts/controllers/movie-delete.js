@@ -16,6 +16,6 @@ angular.module('clientApp')
         });
     };
     $scope.back = function() {
-        $location.path('/movie/' + $routeParams.id);
+        $location.path('/movies/' + $routeParams.id);
     };
   });

@@ -15,7 +15,7 @@ angular.module('clientApp')
         $scope.movie = movie;
         $scope.saveMovie = function() {
            $scope.movie.save().then(function() {
-              $location.path('/movie/' + $routeParams.id) 
+              $location.path('/movies/' + $routeParams.id);
            });
         };
     });

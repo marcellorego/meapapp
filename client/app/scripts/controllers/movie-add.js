@@ -13,7 +13,7 @@ angular.module('clientApp')
     $scope.saveMovie = function() {
         Movie.post($scope.movie).then(function() {
             $location.path('/movies');
-        })
+        });
     };
     $scope.backMovies = function() {
         $location.path('/movies');
