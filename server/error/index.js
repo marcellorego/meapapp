@@ -6,7 +6,7 @@ var notFound = function(req, res, next) {
 };
 
 var serverError = function(error, req, res, next) {
-    res.status(500);
+    res.status(error.status || 500);
     res.render('server-error', {error: error});
 };
 

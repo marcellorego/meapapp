@@ -15,5 +15,5 @@ module.exports = function(app, route) {
 		next();
 	};
 	
-	return result; 
+	return result;
 };

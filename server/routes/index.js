@@ -6,16 +6,18 @@ var fs = require('fs'),
 module.exports = Router;
 
 function Router(controllerPath) {
-    this.initRouter(controllerPath);
+    this.routes = {};
+    this.controllerPath = controllerPath;
 }
 
 Router.prototype.loadRoutes = function(onLoad) {
    
     var self = this;
+    /*self.routes = {
+        '/movie': require('../controllers/MovieController')
+    };*/
     
-    self.addController('/movie', this.controllerPath + '/MovieController');
-    
-    /*readControllerPath(this.controllerPath, function(mapRoutes) {
+    readControllerPath(this.controllerPath, function(mapRoutes) {
         
         for (var route in mapRoutes) {
             var file = mapRoutes[route];
@@ -23,20 +25,13 @@ Router.prototype.loadRoutes = function(onLoad) {
         };
         
         onLoad(self.routes);        
-    });*/
-    
-    onLoad(self.routes);
+    });
 }
 
 Router.prototype.addController = function (routePath, controller) {
     if (!this.routes) this.routes = {};
     this.routes[routePath] = require(controller);
     console.log("Added contoller %s", routePath);
-}
-
-Router.prototype.initRouter = function(controllerPath) {
-    this.routes = {};
-    this.controllerPath = controllerPath;
 }
 
 var fileControllerRouteResolver = function(file) {
@@ -69,14 +64,14 @@ var readControllerPath = function(controllerPath, onReadDone) {
                 mapRoutes[route] = file;
             });
             
-            /*var controllersFolders = fileNames.filter(function (file) {
+            var controllersFolders = fileNames.filter(function (file) {
                 var isFolder = fs.statSync(file).isDirectory();
                 return isFolder;
             }); 
             
             controllersFolders.forEach(function (folder) {
-                readControllerPath(folder, onLoadPath);
-            });*/
+                readControllerPath(folder, onReadDone);
+            });
             
         } else {
             throw err;

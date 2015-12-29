@@ -1,13 +1,14 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
-    _ = require('lodash')
-    //,morgan = require('morgan');
+    path = require("path"),
+    //_ = require('lodash')
+    morgan = require('morgan')
     ;
 console.log(__dirname);
 
 //Load package.json
-var pjson = require(__dirname + '/package.json');
+var pjson = require(path.join(__dirname, '/package.json'));
 
 // Create the application
 var app = express();
@@ -17,16 +18,16 @@ app.locals.database = pjson.database;
 app.locals.version = pjson.version;
 
 app.locals.path = {
-    public : __dirname + '/public',
-    controller : __dirname + '/controllers',
-    view : __dirname + '/views'
+    public : path.join(__dirname, '/public'),
+    controller : path.join(__dirname, '/controllers'),
+    view : path.join(__dirname, '/views')
 };
 
 app.locals.require = {
-    dbconfig : __dirname + '/config/dbconfig',
-    model : __dirname + '/models/index',
-    error : __dirname + '/error/index',
-    route : __dirname + '/routes/index'
+    dbconfig : path.join(__dirname, '/config/dbconfig'),
+    model : path.join(__dirname, '/models/index'),
+    error : path.join(__dirname, '/error/index'),
+    route : path.join(__dirname, '/routes/index')
 };
 
 // Sets app views engine
@@ -51,14 +52,13 @@ app
 	next();
 });
 
-// Error pages support
-var error = require(app.locals.require.error);
-app
-.use(error.notFound);
-app
-.use(error.serverError);
+app.use(morgan('combined'));
 
-//app.use(morgan('combined'));
+/*.use(function(req, res, next) {
+    // do logging
+    console.log(req);
+    next(); // make sure we go to the next routes and don't stop here
+});*/
 
 var connectDB = require(app.locals.require.dbconfig);
 var db = connectDB(app.locals.database, onDatabaseOpened, onDatabaseError);
@@ -70,6 +70,8 @@ function onDatabaseOpened() {
 
     //Load routes
     loadRoutes();
+
+    //loadErrorPages();
 
 	console.log('Listening on port 3000');
 	app.listen(3000);
@@ -90,9 +92,17 @@ function loadRoutes() {
 };
 
 function onRoutesLoaded(routes) {
-    _.each(routes, function(controller, route) {
-		app.use(route, controller(app, route));
-	});
+    for (var route in routes) {
+        var controller = routes[route];
+        app.use(route, controller(app, route));
+    }
 };
 
-module.exports = db;
+function loadErrorPages() {
+    // Error pages support
+    var error = require(app.locals.require.error);
+    app.use(error.notFound);
+    app.use(error.serverError);
+}
+
+module.exports = app;
