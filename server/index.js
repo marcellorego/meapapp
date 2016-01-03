@@ -1,42 +1,49 @@
+'use strict'
+
 var express = require('express'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
     path = require("path"),
     //_ = require('lodash')
-    morgan = require('morgan')
+    morgan = require('morgan')   
     ;
+
 console.log(__dirname);
 
 //Load package.json
 var pjson = require(path.join(__dirname, '/package.json'));
 
+// Properties for the application
+var database = pjson.database;
+var version = pjson.version;
+
 // Create the application
 var app = express();
 
-// Properties for the application
-app.locals.database = pjson.database;
-app.locals.version = pjson.version;
+app.locals.version = version;
 
-app.locals.path = {
-    public : path.join(__dirname, '/public'),
-    controller : path.join(__dirname, '/controllers'),
-    view : path.join(__dirname, '/views')
+app.locals.paths = {
+    public :        path.join(__dirname, '/public'),
+    api :           path.join(__dirname, '/api'),
+    views :         [
+        path.join(__dirname, '/views')
+    ]
 };
 
-app.locals.require = {
-    dbconfig : path.join(__dirname, '/config/dbconfig'),
-    model : path.join(__dirname, '/models/index'),
-    error : path.join(__dirname, '/error/index'),
-    route : path.join(__dirname, '/routes/index')
+app.locals.requires = {
+    dbConfig :      path.join(__dirname, '/dbConfig/index'),
+    error :         path.join(__dirname, '/error/index'),
+    route :         path.join(__dirname, '/routes/index'),
+    watch :         path.join(__dirname, '/watch/index'),
+    resolver :      path.join(__dirname, '/resolver/index'),
+    model :         path.join(__dirname, '/models/index')
 };
 
 // API config
 app.locals.apiConfig = {};
 
-// Sets app views engine
-app.set('views', app.locals.path.view);
-app.set('view engine', 'ejs');
-app.use(express.static(app.locals.path.public));
+// DB Connection
+var connectDB = require(app.locals.requires.dbConfig);
 
 // Add middleware necessary for REST API's
 app
@@ -63,24 +70,27 @@ app.use(morgan('combined'));
     next(); // make sure we go to the next routes and don't stop here
 });*/
 
-var connectDB = require(app.locals.require.dbconfig);
-var db = connectDB(app.locals.database, onDatabaseOpened, onDatabaseError);
+// Connects to the database
+var db = connectDB(database, onDatabaseOpened, onDatabaseError);
+app.locals.db = db;
 
 function onDatabaseOpened() {
     
-    //Load models
-    //loadModels();
+    //Create models
+    //createModels();
 
     //Load routes
     //loadRoutes();
 
     //loadErrorPages();
 
-    //Watch new routes
-    watchApi(app.locals.path.controller, app.locals.apiConfig);
+    //Watch Hot Dploy Mean Api
+    var watchHDMA = require(app.locals.requires.watch);
+    watchHDMA(app.locals.paths.api, app.locals.apiConfig);
 
     // Register api resolver
-    apiResolver(app.locals.apiConfig);
+    var resolverHDMA = require(app.locals.requires.resolver);
+    resolverHDMA(app.locals.apiConfig);
     
 	console.log('Listening on port 3000');
 	app.listen(3000);
@@ -90,7 +100,7 @@ function onDatabaseError() {
     console.error.bind(console, 'connection error:')
 };
 
-function loadModels() {
+function createModels() {
     var Model = require(app.locals.require.model);
     var models = new Model();
     app.models = models;
@@ -116,45 +126,12 @@ function loadErrorPages() {
     app.use(error.serverError);
 }
 
-function watchApi(apiPath, apiConfig) {
-    
-    var chokidar = require('chokidar');
-    
-    var watcher = chokidar
-    .watch(apiPath, {
-        ignored: /^\./, 
-        persistent: true
-    });
+function viewsRendererResolver() {
 
-    watcher
-    .on('addDir', function(dir) {
-        var key = path.basename(dir);
-        apiConfig[key] = dir;
-    })
-    .on('unlinkDir', function(dir) {
-        var key = path.basename(dir);
-        delete apiConfig[key];
-    })
-    .on('error', function(error) {
-        console.error('Error happened', error);
-    });
-}
-
-function apiResolver(apiConfig) {
-    
-    var watchConfig = require('observed');
-    
-    Object.observe(apiConfig, function (changes) {
-        var change = null;
-        for (var index in changes) {
-            change = changes[index];
-            if (change.type === 'add') {
-                console.log(change.type, change.name);            
-            } else {
-                console.log(change.type, change.name);
-            }            
-        }
-    });
+    // Sets app views engine
+    app.set('views', app.locals.path.views);
+    app.set('view engine', 'ejs');
+    app.use(express.static(app.locals.path.public));
 }
 
 module.exports = app;

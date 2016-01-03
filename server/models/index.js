@@ -7,10 +7,14 @@ Model.prototype.addModel = function(key, pathToModel) {
     this.modelMap[key] = require(pathToModel);
 }
 
-Model.prototype.removeModel = function(key) {
+Model.prototype.deleteModel = function(key) {
     if (this.modelMap) {
         delete this.modelMap[key];
     }
+}
+
+Model.prototype.getModel = function(key) {
+    return this.modelMap[key];
 }
 
 //{
