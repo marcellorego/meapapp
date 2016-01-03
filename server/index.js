@@ -4,7 +4,8 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     methodOverride = require('method-override'),
     path = require("path"),
-    //_ = require('lodash')
+    //_ = require('lodash'),
+    //restful = require('node-restful'),
     morgan = require('morgan')   
     ;
 
@@ -76,13 +77,8 @@ app.locals.db = db;
 
 function onDatabaseOpened() {
     
-    //Create models
-    //createModels();
-
-    //Load routes
-    //loadRoutes();
-
-    //loadErrorPages();
+    //Create main model
+    createModel();
 
     //Watch Hot Dploy Mean Api
     var watchHDMA = require(app.locals.requires.watch);
@@ -90,33 +86,21 @@ function onDatabaseOpened() {
 
     // Register api resolver
     var resolverHDMA = require(app.locals.requires.resolver);
-    resolverHDMA(app.locals.apiConfig);
+    resolverHDMA(app);
     
-	console.log('Listening on port 3000');
-	app.listen(3000);
+    var port = process.env.NODEPORT || 3000;
+	console.log('Listening on port ' + port);
+	app.listen(port);
 };
 
 function onDatabaseError() {
     console.error.bind(console, 'connection error:')
 };
 
-function createModels() {
-    var Model = require(app.locals.require.model);
-    var models = new Model();
-    app.models = models;
-};
-
-function loadRoutes() {
-    var Route = require(app.locals.require.route);
-	var router = new Route(app.locals.path.controller);
-    router.loadRoutes(onRoutesLoaded);
-};
-
-function onRoutesLoaded(routes) {
-    for (var route in routes) {
-        var controller = routes[route];
-        app.use(route, controller(app, route));
-    }
+function createModel() {
+    var Model = require(app.locals.requires.model);
+    var model = new Model();
+    app.locals.model = model;
 };
 
 function loadErrorPages() {

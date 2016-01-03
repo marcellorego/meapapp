@@ -1,24 +1,22 @@
+'use strict'
+
 function Model() {
-    this.modelMap = {};
+    this.resources = {};
 }
 
-Model.prototype.addModel = function(key, pathToModel) {
-    if (!this.modelMap) this.modelMap = {};
-    this.modelMap[key] = require(pathToModel);
+Model.prototype.addModel = function(key, resource) {
+    if (!this.resources) this.resources = {};
+    this.resources[key] = resource;
 }
 
 Model.prototype.deleteModel = function(key) {
-    if (this.modelMap) {
-        delete this.modelMap[key];
-    }
+    if (!this.resources) this.resources = {};
+    delete this.resources[key];
 }
 
 Model.prototype.getModel = function(key) {
-    return this.modelMap[key];
+    if (!this.resources) this.resources = {};
+    return this.resources[key];
 }
-
-//{
-//	movie: require('./Movies.js')	
-//};
 
 module.exports = Model;
