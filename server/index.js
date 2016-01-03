@@ -30,6 +30,9 @@ app.locals.require = {
     route : path.join(__dirname, '/routes/index')
 };
 
+// API config
+app.locals.apiConfig = {};
+
 // Sets app views engine
 app.set('views', app.locals.path.view);
 app.set('view engine', 'ejs');
@@ -66,13 +69,19 @@ var db = connectDB(app.locals.database, onDatabaseOpened, onDatabaseError);
 function onDatabaseOpened() {
     
     //Load models
-    loadModels();
+    //loadModels();
 
     //Load routes
-    loadRoutes();
+    //loadRoutes();
 
     //loadErrorPages();
 
+    //Watch new routes
+    watchApi(app.locals.path.controller, app.locals.apiConfig);
+
+    // Register api resolver
+    apiResolver(app.locals.apiConfig);
+    
 	console.log('Listening on port 3000');
 	app.listen(3000);
 };
@@ -82,7 +91,9 @@ function onDatabaseError() {
 };
 
 function loadModels() {
-    app.models = require(app.locals.require.model);
+    var Model = require(app.locals.require.model);
+    var models = new Model();
+    app.models = models;
 };
 
 function loadRoutes() {
@@ -103,6 +114,47 @@ function loadErrorPages() {
     var error = require(app.locals.require.error);
     app.use(error.notFound);
     app.use(error.serverError);
+}
+
+function watchApi(apiPath, apiConfig) {
+    
+    var chokidar = require('chokidar');
+    
+    var watcher = chokidar
+    .watch(apiPath, {
+        ignored: /^\./, 
+        persistent: true
+    });
+
+    watcher
+    .on('addDir', function(dir) {
+        var key = path.basename(dir);
+        apiConfig[key] = dir;
+    })
+    .on('unlinkDir', function(dir) {
+        var key = path.basename(dir);
+        delete apiConfig[key];
+    })
+    .on('error', function(error) {
+        console.error('Error happened', error);
+    });
+}
+
+function apiResolver(apiConfig) {
+    
+    var watchConfig = require('observed');
+    
+    Object.observe(apiConfig, function (changes) {
+        var change = null;
+        for (var index in changes) {
+            change = changes[index];
+            if (change.type === 'add') {
+                console.log(change.type, change.name);            
+            } else {
+                console.log(change.type, change.name);
+            }            
+        }
+    });
 }
 
 module.exports = app;
